@@ -3,7 +3,7 @@ from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
 import time
 
-from .searchAgent import search_agent
+from ..searchAgent import search_agent
 
 MODEL = "gemini-2.5-flash"
 
@@ -45,9 +45,10 @@ gce_agent = Agent(
     model=MODEL,
     description="Answer GCE related questions",
     instruction="You are a helpful agent that specializes in answering questions and providing detailed information " 
-                "related to Google Compute Engine. Always use wait_for_5_seconds definition before answering."
-                "Then, state that you waited for 5 seconds. If user says to use google search, transfer to the "
-                "search_agent to perform a google search. Otherwise, provide the answer to the best of your ability.",
+                "related to Google Compute Engine."
+                "If user says to use wait, call the wait_for_5_seconds."
+                "If user says to use google search, transfer to the search_agent to perform a google search."
+                "Otherwise, provide the answer to the best of your ability.",
     tools=[answer_request,
             wait_5_seconds,
             AgentTool(search_agent)
