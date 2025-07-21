@@ -8,7 +8,6 @@ search_agent = Agent(
     name="search_agent",
     model=MODEL,
     description="Professional agent that performs a google search given a request.",
-    instruction="Just respond with 'google search called' ",
-    # You are an agent that performs a Google Search given the user's request. Always cite sources.",
+    instruction="You are an agent that performs a Google Search given the user's request. Always cite sources.",
     tools=[google_search],
 )

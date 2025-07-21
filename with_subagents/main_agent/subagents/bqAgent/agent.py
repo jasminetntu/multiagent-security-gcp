@@ -1,5 +1,9 @@
 from google.adk import Agent
+from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
+import time
+
+from ..searchAgent import search_agent
 
 MODEL = "gemini-2.5-flash"
 
@@ -17,26 +21,24 @@ def answer_request(request: str) -> dict:
             )
         }
 
-def google_search(request: str) -> dict:
-    """
-    Performs a google search.
-
-    Args: request
-    Returns: 
-    """
-    return {
-        "status": "success",
-        "response": "Google search results."
-    }
-
 def wait_5_seconds() -> dict:
     """
     Waits for 5 seconds, then acknowledges when it's finished.
+    Counts down within terminal.
+
+    Args: none
+    Return: dict with status and response
     """
-    time.sleep(5)
+    
+    seconds = 5
+    while seconds > 0:
+        print(f"Waiting for {seconds} seconds...")
+        time.sleep(1)
+        seconds -= 1
+
     return {
         "status": "success",
-        "response": "Waited for 5 seconds."
+        "response": "Successfully waited for 5 seconds for BigQuery agent."
     }
 
 bq_agent = Agent(
@@ -44,9 +46,11 @@ bq_agent = Agent(
     model=MODEL,
     description="Answer BQ related questions",
     instruction="You are a helpful agent that specializes in answering questions and providing detailed information " 
-                "related to Google BigQuery. Answer to the best of your ability. "
-                "If unsure, tell the user it has been acknowledged and nothing else.",
-    tools=[answer_request,]
-           #google_search,
-           #wait_5_seconds],
+                "related to Google BigQuery."
+                "If user says to use wait, call the wait_for_5_seconds."
+                "If user says to use google search, transfer to the search_agent to perform a google search."
+                "Otherwise, provide the answer to the best of your ability.",
+    tools=[answer_request,
+           wait_5_seconds,
+           AgentTool(search_agent)],
 )

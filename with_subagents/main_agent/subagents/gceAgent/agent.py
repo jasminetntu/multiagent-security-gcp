@@ -24,6 +24,7 @@ def answer_request(request: str) -> dict:
 def wait_5_seconds() -> dict:
     """
     Waits for 5 seconds, then acknowledges when it's finished.
+    Counts down within terminal.
 
     Args: none
     Return: dict with status and response
@@ -37,7 +38,7 @@ def wait_5_seconds() -> dict:
 
     return {
         "status": "success",
-        "response": "Successfully waited for 5 seconds."
+        "response": "Successfully waited for 5 seconds for Compute Engine agent."
     }
 
 gce_agent = Agent(
