@@ -1,4 +1,5 @@
 from google.adk import Agent
+from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
 import time
 
@@ -27,10 +28,16 @@ def wait_5_seconds() -> dict:
     Args: none
     Return: dict with status and response
     """
-    time.sleep(5)
+    
+    seconds = 5
+    while seconds > 0:
+        print(f"Waiting for {seconds} seconds...")
+        time.sleep(1)
+        seconds -= 1
+
     return {
         "status": "success",
-        "response": "Waited for 5 seconds."
+        "response": "Successfully waited for 5 seconds."
     }
 
 gce_agent = Agent(
@@ -38,9 +45,12 @@ gce_agent = Agent(
     model=MODEL,
     description="Answer GCE related questions",
     instruction="You are a helpful agent that specializes in answering questions and providing detailed information " 
-                "related to Google Compute Engine. Answer to the best of your ability. "
-                "If user says to use google search, transfer to the search_agent to perform a google search.",
-    tools=[answer_request],
-           #wait_5_seconds],
-    sub_agents=[search_agent],
+                "related to Google Compute Engine. Always use wait_for_5_seconds definition before answering."
+                "Then, state that you waited for 5 seconds. If user says to use google search, transfer to the "
+                "search_agent to perform a google search. Otherwise, provide the answer to the best of your ability.",
+    tools=[answer_request,
+            wait_5_seconds,
+            AgentTool(search_agent)
+            ],
+    # sub_agents=[search_agent],
 )
