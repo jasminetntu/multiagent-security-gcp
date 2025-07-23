@@ -21,7 +21,7 @@ git clone https://github.com/amanshresthaatgoogle/cloudsploit_refactored_tools.g
 
 **2. Install Dependencies**
 
-<!-- Install the required Python and Node.js packages for each project.
+Install the required Python and Node.js packages for each project.
 
 ```bash
 # Install Python dependencies
@@ -44,7 +44,7 @@ module.exports = {
         project_id: 'your-gcp-project-id-goes-here',
     }
 };
-``` -->
+```
 
 **4. Set Environment Variables**
 
