@@ -4,6 +4,7 @@ from google.genai import types
 import time
 
 from ..searchAgent import search_agent
+from cloudsploitFunction.call_cspl import setup_scan
 
 MODEL = "gemini-2.5-flash"
 
@@ -41,6 +42,9 @@ def wait_5_seconds() -> dict:
         "response": "Successfully waited for 5 seconds for BigQuery agent."
     }
 
+def scan_vulnerabilities() -> dict:
+    return setup_scan()
+
 bq_agent = Agent(
     name="bq_agent",
     model=MODEL,
@@ -49,8 +53,10 @@ bq_agent = Agent(
                 "related to Google BigQuery."
                 "If user says to use wait, call the wait_for_5_seconds."
                 "If user says to use google search, transfer to the search_agent to perform a google search."
+                "If user says to scan a vulnerability in their Big Query project, call the scan_vulnerabilities."
                 "Otherwise, provide the answer to the best of your ability.",
     tools=[answer_request,
            wait_5_seconds,
+           scan_vulnerabilities,
            AgentTool(search_agent)],
 )
