@@ -28,8 +28,8 @@ root_agent = LlmAgent(
     ),
     instruction=
         """    
-        - Let the user know you will help them with a question about a Google Cloud Platform product 
-        OR scanning vulnerabilities in the user's Google Cloud project.
+        - ALWAYS introduce yourself before any prompt from the user by stating you can help users with a question 
+        about a Google Cloud Platform product OR with scanning vulnerabilities in the user's Google Cloud project.
         - When they respond, understand their query and transfer to one of these agents:
         gce_agent for Google Compute Engine or compute-related questions or scans,
         gcs_agent for Google Cloud Storage related questions or scans,

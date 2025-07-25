@@ -43,17 +43,23 @@ def wait_5_seconds() -> dict:
     }
 
 def scan_vulnerabilities() -> dict:
-    return setup_scan()
+    return setup_scan("sql")
 
 sql_agent = Agent(
     name="sql_agent",
     model=MODEL,
     description="Answer SQL related questions",
-    instruction="You are a helpful agent that specializes in answering questions and providing detailed information " 
-                "related to Google Cloud SQL."
-                "If user says to use wait, call the wait_for_5_seconds."
-                "If user says to use google search, transfer to the search_agent to perform a google search."
-                "Otherwise, provide the answer to the best of your ability.",
+    instruction="""
+                You are a helpful agent that specializes in answering questions and providing detailed information related to Google Cloud SQL.
+                If user says to use wait, call the wait_for_5_seconds.
+                If user says to use google search, transfer to the search_agent to perform a google search.
+                If user says to scan a vulnerability in their Cloud SQL project, call the scan_vulnerabilities.
+                    Once the scan is complete, first provide a summary of the top 5 most severe vulnerabilities and how easy
+                    they are to fix (easy, medium, hard). Then, provide a table format of all the data from the scan.
+                    The table should have 4 columns: vulnerability name, severity, how easy it is to fix, and a
+                    quick summary of the vulnerability. If there are 0 vulnerabilities, say "Congrats! Your project has no vulnerabilities."
+                Otherwise, provide the answer to the best of your ability.
+                """,
     tools=[answer_request,
            wait_5_seconds,
            scan_vulnerabilities,

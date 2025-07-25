@@ -45,7 +45,7 @@ def invoke_cloudsploit_scanner(function_url, key_path, settings):
         }
         
         print(f"\nSending POST request to: {function_url}")
-        print(f"Requesting scan for plugin: {settings.get('plugin', 'all')}")
+        print(f"Requesting scan for plugin: {settings.get('product')}")
         
         response = requests.post(function_url, headers=headers, json=payload, timeout=600) # 10 minute timeout
 
@@ -69,9 +69,9 @@ def invoke_cloudsploit_scanner(function_url, key_path, settings):
         print(f"An unexpected error occurred: {e}")
         print("Please ensure the service account has the 'Cloud Functions Invoker' and 'Service Account Token Creator' roles.")
 
-def setup_scan():
+def setup_scan(product):
     # --- CONFIGURATION ---
-    FUNCTION_URL = "https://cloudsploit-scanner-254116077699.europe-west1.run.app"
+    FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     
     script_dir = os.path.dirname(os.path.abspath(__file__)) # get the directory of script
     KEY_FILE_PATH = os.path.join(script_dir, 'key.json') # get path of key.json
@@ -80,7 +80,7 @@ def setup_scan():
     try:
         # Define the settings for scan
         scan_settings = {
-            "plugin": "automaticRestartEnabled"
+            "product": product
         }
         
         response = invoke_cloudsploit_scanner(FUNCTION_URL, KEY_FILE_PATH, scan_settings)
@@ -100,7 +100,7 @@ def setup_scan():
 #for local testing
 if __name__ == '__main__':
     # --- CONFIGURATION ---
-    FUNCTION_URL = "https://cloudsploit-scanner-254116077699.europe-west1.run.app"
+    FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     KEY_FILE_PATH = 'key.json'
 
     # --- EXECUTION ---
