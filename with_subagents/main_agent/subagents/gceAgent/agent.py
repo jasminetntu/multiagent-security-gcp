@@ -4,6 +4,7 @@ from google.genai import types
 import time
 
 from ..searchAgent import search_agent
+from cloudsploitFunction.call_cspl import setup_scan
 
 MODEL = "gemini-2.5-flash"
 
@@ -41,6 +42,9 @@ def wait_5_seconds() -> dict:
         "response": "Successfully waited for 5 seconds for Compute Engine agent."
     }
 
+def scan_vulnerabilities() -> dict:
+    return setup_scan()
+
 gce_agent = Agent(
     name="gce_agent",
     model=MODEL,
@@ -52,7 +56,7 @@ gce_agent = Agent(
                 "Otherwise, provide the answer to the best of your ability.",
     tools=[answer_request,
             wait_5_seconds,
-            AgentTool(search_agent)
-            ],
+            scan_vulnerabilities,
+            AgentTool(search_agent)],
     # sub_agents=[search_agent],
 )
