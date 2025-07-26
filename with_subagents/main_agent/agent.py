@@ -15,7 +15,7 @@ from google.genai import types
 
 MODEL = "gemini-2.5-flash"
 
-from .subagents.searchAgent import search_agent
+from .subagents.answerAgent import answer_agent
 from .subagents.scannerAgent import scanner_agent
 
 root_agent = LlmAgent(
@@ -34,7 +34,7 @@ root_agent = LlmAgent(
         Always send the full request.
         For all else, say "Currently not supported."
         """,
-    sub_agents=[search_agent, scanner_agent],
+    sub_agents=[answer_agent, scanner_agent],
 )
 
 
