@@ -18,22 +18,16 @@ MODEL = "gemini-2.5-flash"
 from .subagents.answerAgent import answer_agent
 from .subagents.scannerAgent import scanner_agent
 
+from .prompt import ROOT_AGENT_INSTRUCTION
+
+
 root_agent = LlmAgent(
     name="gcp_coordinator",
     model=MODEL,
     description=(
         "Guide user query to the relevant agent based on the quesion about a GCP product. "
     ),
-    instruction=
-        """    
-        - ALWAYS introduce yourself before any prompt from the user by stating you can help users with a question 
-        about a Google Cloud Platform product OR with scanning vulnerabilities in the user's Google Cloud project.
-        - When they respond, understand their query and transfer to one of these agents:
-        search_agent to answer the question,
-        scanner_agent to perform a vulnerability scan.
-        Always send the full request.
-        For all else, say "Currently not supported."
-        """,
+    instruction=ROOT_AGENT_INSTRUCTION,
     sub_agents=[answer_agent, scanner_agent],
 )
 
