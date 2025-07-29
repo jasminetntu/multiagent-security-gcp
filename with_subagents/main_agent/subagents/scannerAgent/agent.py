@@ -3,12 +3,17 @@ from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
 from cloudsploitFunction.call_cspl import setup_scan
 
+from google.adk.tools.tool_context import ToolContext
+
+
 MODEL = "gemini-2.5-flash"
 
 from .prompt import SCANNER_PROMPT
 
-def scan_vulnerabilities(product: str) -> dict:
-    return setup_scan(product)
+def scan_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
+    
+    obtained_key = tool_context.state['key']
+    return setup_scan(product, obtained_key)
 
 scanner_agent = Agent(
     name="scanner_agent",

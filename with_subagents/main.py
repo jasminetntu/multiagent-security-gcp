@@ -17,16 +17,16 @@ session_service = InMemorySessionService()
 # ===== PART 2: Define Initial State =====
 # This will be used when creating a new session
 initial_state = {
-    "user_name": "Brandon Hancock",
-    "purchased_courses": [],
+    "key": "notAvailable",
+    "vulnerabilities": {},
     "interaction_history": [],
 }
 
 
 async def main_async():
     # Setup constants
-    APP_NAME = "Customer Support"
-    USER_ID = "aiwithbrandon"
+    APP_NAME = "Security Agent"
+    USER_ID = "security agent"
 
     # ===== PART 3: Session Creation =====
     # Create a new session with initial state
@@ -48,7 +48,7 @@ async def main_async():
     )
 
     # ===== PART 5: Interactive Conversation Loop =====
-    print("\nWelcome to Customer Support!")
+    print("\nWelcome to Security Agent!")
     print("Type 'exit' or 'quit' to end the conversation.\n")
 
     while True:

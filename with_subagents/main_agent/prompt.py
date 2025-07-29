@@ -15,11 +15,14 @@
 """Prompt and description for the gcp_coordinator."""
 
 ROOT_AGENT_INSTRUCTION = """    
-        - ALWAYS introduce yourself before any prompt from the user by stating you can help users with a question 
-        about a Google Cloud Platform product OR with scanning vulnerabilities in the user's Google Cloud project.
+        - Always introduce yourself before any prompt from the user by stating you can help users with a question 
+        about a Google Cloud Platform product and also scan vulnerabilities in the user's Google Cloud project.
         - When they respond, understand their query and transfer to one of these agents:
-        search_agent to answer the question,
-        scanner_agent to perform a vulnerability scan.
+        if it's a general question, send it to the answer_agent to answer the question,
+        if it requires a scan, then check if key's value which is {key} is notAvailable, 
+                - if it is, then add to your response that {key} is notAvailable then ask the user to send the key in chat to perform a vulnerability scan.
+                        - send the key to set_key_agent to set it to the state
+                - if {key} is available, then call scanner_agent to run the scan with the available key
         Always send the full request.
         For all else, say "Currently not supported."
         """

@@ -5,27 +5,29 @@ from google.oauth2 import service_account
 from google.auth.transport import requests as auth_requests
 import os
 
-
-def invoke_cloudsploit_scanner(function_url, key_path, settings):
+def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
     """
     Makes an authenticated POST request to the deployed CloudSploit scanner function.
-    This function generates an OIDC token directly from the service account key.
+    This function generates an OIDC token directly from the service account key info.
 
     Args:
         function_url (str): The trigger URL of the deployed Cloud Function.
-        key_path (str): The file path to the GCP service account key JSON file.
+        service_account_key (dict): The GCP service account key as a dictionary.
         settings (dict): A dictionary of settings for the scan.
     """
     try:
         # --- Programmatic Authentication ---
-        # Instead of calling the gcloud CLI, we use the google-auth library
+        # Instead of reading from a file, we now use the provided key dictionary
         # to generate an identity token for the function's URL (the audience).
         print(f"Generating auth token for audience: {function_url}")
         auth_req = auth_requests.Request()
-        creds = service_account.IDTokenCredentials.from_service_account_file(
-            key_path,
+        
+        # Use from_service_account_info to load credentials from a dictionary
+        creds = service_account.IDTokenCredentials.from_service_account_info(
+            service_account_key,
             target_audience=function_url
         )
+        
         creds.refresh(auth_req)
         auth_token = creds.token
         print("Successfully generated auth token from service account key.")
@@ -35,27 +37,20 @@ def invoke_cloudsploit_scanner(function_url, key_path, settings):
             'Content-Type': 'application/json'
         }
 
-        # Load the service account key to be sent in the request body
-        with open(key_path, 'r') as f:
-            service_account_key = json.load(f)
-
+        # The service account key is now passed directly in the payload
         payload = {
             "serviceAccount": service_account_key,
             "settings": settings
         }
         
         print(f"\nSending POST request to: {function_url}")
-        print(f"Requesting scan for plugin: {settings.get('product')}")
+        print(f"Requesting scan for plugin: {settings.get('product') or settings.get('plugin')}")
         
         response = requests.post(function_url, headers=headers, json=payload, timeout=600) # 10 minute timeout
 
         # Raise an exception for bad status codes (4xx or 5xx)
         response.raise_for_status()
         
-        # print("\n--- SCAN RESULTS (JSON) ---")
-        # # Pretty-print the JSON response
-        # print(json.dumps(response.json(), indent=2))
-
         return response.json()
 
     except requests.exceptions.RequestException as e:
@@ -69,39 +64,53 @@ def invoke_cloudsploit_scanner(function_url, key_path, settings):
         print(f"An unexpected error occurred: {e}")
         print("Please ensure the service account has the 'Cloud Functions Invoker' and 'Service Account Token Creator' roles.")
 
-def setup_scan(product):
+def setup_scan(product, service_account_key_json):
+    """
+    Sets up and invokes the scanner with the provided product and key.
+
+    Args:
+        product (str): The product or plugin to scan for.
+        service_account_key_json (str): The GCP service account key as a JSON string.
+    """
     # --- CONFIGURATION ---
     FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     
-    script_dir = os.path.dirname(os.path.abspath(__file__)) # get the directory of script
-    KEY_FILE_PATH = os.path.join(script_dir, 'key.json') # get path of key.json
-
-    # --- EXECUTION ---
     try:
-        # Define the settings for scan
+        # Load the key from the JSON string into a dictionary
+        service_account_key = json.loads(service_account_key_json)
+
+        print("Found key is in call_cspl ")
+        print(service_account_key)
+
+        # Define the settings for the scan
         scan_settings = {
             "product": product
         }
         
-        response = invoke_cloudsploit_scanner(FUNCTION_URL, KEY_FILE_PATH, scan_settings)
+        # Call the invoker function with the key dictionary
+        response = invoke_cloudsploit_scanner(FUNCTION_URL, service_account_key, scan_settings)
 
         return {
             "status": "success",
             "response": response
         }
         
-    except Exception as e:
-        # The function now has its own error handling, but we catch any final issues.
+    except json.JSONDecodeError:
         return {
             "status": "fail",
-            "response": f"unknown error occurred: {e}" #"\nScript failed to complete."
+            "response": "Invalid JSON format for the service account key."
+        }
+    except Exception as e:
+        return {
+            "status": "fail",
+            "response": f"An unknown error occurred: {e}"
         }
 
-#for local testing
+# For local testing
 if __name__ == '__main__':
     # --- CONFIGURATION ---
     FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
-    KEY_FILE_PATH = 'key.json'
+    KEY_FILE_PATH = 'key.json'  # The key file is only used for local testing now
 
     # --- EXECUTION ---
     try:
@@ -110,9 +119,21 @@ if __name__ == '__main__':
             "plugin": "automaticRestartEnabled"
         }
         
-        # Call the function which now handles all logic
-        invoke_cloudsploit_scanner(FUNCTION_URL, KEY_FILE_PATH, scan_settings)
+        # Load the service account key from the file into a dictionary
+        if not os.path.exists(KEY_FILE_PATH):
+            print(f"Error: Key file not found at '{KEY_FILE_PATH}'. Please create it for local testing.")
+        else:
+            with open(KEY_FILE_PATH, 'r') as f:
+                key_dict = json.load(f)
+            
+            # Call the function which now handles all logic
+            results = invoke_cloudsploit_scanner(FUNCTION_URL, key_dict, scan_settings)
+            
+            if results:
+                print("\n--- SCAN RESULTS (JSON) ---")
+                # Pretty-print the JSON response
+                print(json.dumps(results, indent=2))
         
     except Exception as e:
         # The function now has its own error handling, but we catch any final issues.
-        print(f"\nScript failed to complete.")
+        print(f"An error occurred during local testing: {e}")
