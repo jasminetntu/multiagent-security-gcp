@@ -1,18 +1,10 @@
-# Copyright 2025 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# main_agent/subagents/setKeyAgent/agent.py
 
-"""answer_agent for providing answers to user queries."""
+import sys
+import os
+import json
+from pydantic import ValidationError
+from schemas import GCPServiceAccountKey 
 
 from google.adk import Agent
 from google.adk.tools.agent_tool import AgentTool
@@ -28,44 +20,97 @@ MODEL = "gemini-2.5-flash"
 
 def setKey(tool_context: ToolContext, key: dict) -> dict:
     """
-    Get the key from user and set key into the state
+    Validates and sets the GCP key into the state.
 
-    Args: key
-    Returns: dict with status and response
+    Args: 
+        tool_context: The context for the tool execution.
+        key: The input key data. This might be a dict, a string JSON, or 'notAvailable'.
+
+    Returns: 
+        A dictionary with status, response configuration, and a message.
     """
 
-    # Check the key
-    print("Key found is ")
-    print(key)
-    key['status'] = 200
-    tool_context.state["key"] = key
-    return {
-            "status": "success",
-            "response": types.GenerateContentConfig(
-                temperature=1,
-            )
+    # 1. Handle cases where no key is provided or it's the placeholder 'notAvailable'
+    if key is None or key == "notAvailable" or key == "":
+        print("No GCP key provided or key is 'notAvailable'. Cannot set key.")
+        return {
+            "status": "error",
+            "response": types.GenerateContentConfig(temperature=0.1), # Config for next LLM turn
+            "message": "No GCP service account key was provided. Please provide the key to proceed.",
         }
 
+    # 2. Process provided key (attempt to parse and validate)
+    key_dict = None
+    try:
+        if isinstance(key, str):
+            try:
+                key_dict = json.loads(key)
+            except json.JSONDecodeError:
+                print(f"Error: Input 'key' is a string but not valid JSON: {key}")
+                return {
+                    "status": "error",
+                    "response": types.GenerateContentConfig(temperature=0.1),
+                    "message": "Invalid JSON format for the key. Please provide valid JSON.",
+                }
+        elif isinstance(key, dict):
+            key_dict = key
+        else:
+            print(f"Error: Unexpected type for 'key'. Expected dict or JSON string, but got {type(key)}")
+            return {
+                "status": "error",
+                "response": types.GenerateContentConfig(temperature=0.1),
+                "message": "Invalid input type for the key. Please provide a JSON object.",
+            }
+
+        # Pydantic Validation
+        validated_key_data = GCPServiceAccountKey(**key_dict)
+        print("GCP Key validated successfully by Pydantic.")
+
+        key_to_store = validated_key_data.model_dump() 
+
+    except ValidationError as e:
+        print(f"GCP Key Validation Error: {e}")
+        error_message = f"Error: The provided GCP key is invalid. Please ensure all required fields are present and correctly formatted. Specific error: {e}"
+        return {
+            "status": "error",
+            "response": types.GenerateContentConfig(temperature=0.1),
+            "message": error_message,
+        }
+    except Exception as e:
+        print(f"An unexpected error occurred during key processing: {e}")
+        return {
+            "status": "error",
+            "response": types.GenerateContentConfig(temperature=0.1),
+            "message": f"An unexpected error occurred while processing the key: {e}",
+        }
+
+    # If validation passed
+    print("Key found and validated:")
+    masked_key_to_store = key_to_store.copy()
+    if "private_key" in masked_key_to_store:
+        masked_key_to_store["private_key"] = "*** (masked)"
+    print(masked_key_to_store)
+
+    key_to_store["private_key"] = key_to_store["private_key"].replace("\n","\\n")
+    
+    tool_context.state["key"] = key_to_store 
+    
+    return {
+        "status": "success",
+        "response": types.GenerateContentConfig(temperature=1),
+        "message": "Successfully validated and set the GCP service account key.", 
+    }
+
+# ... (Rest of your agent definition remains the same) ...
 set_key_agent = Agent(
     name="set_key_agent",
     model=MODEL,
-    description="Get the key and call setKey tool to set the key into the state",  # Using description from prompt.py
-    instruction="""Get the key and call setKey tool to set the key into the state. Make sure to set the key as is sent by the user. 
-    the fields available are:
-        {"type": "",
-        "project_id": "",
-        "private_key_id": "",
-        "private_key": "",
-        "client_email": "",
-        "client_id": "",
-        "auth_uri": "",
-        "token_uri": "",
-        "auth_provider_x509_cert_url": "",
-        "client_x509_cert_url": "",
-        "universe_domain": ""}
-
-        Make sure nothing else is sent to the tool and nothing extra is sent. 
-    """,  # Using instruction from prompt.py
+    description="Get the key and call setKey tool to set the key into the state",
+    instruction="""The user might provide a GCP service account key. If they do, extract it and pass it to the `setKey` tool for validation and storage.
+    If the user asks to run scans without providing a key, you should first prompt them to provide the key.
+    The expected fields for a GCP key are:
+        {"type": "", "project_id": "", "private_key_id": "", "private_key": "", "client_email": "", "client_id": "", "auth_uri": "", "token_uri": "", "auth_provider_x509_cert_url": "", "client_x509_cert_url": "", "universe_domain": ""}
+    """,
     tools=[
         setKey,
     ],

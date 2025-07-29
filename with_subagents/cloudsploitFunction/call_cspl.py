@@ -5,6 +5,9 @@ from google.oauth2 import service_account
 from google.auth.transport import requests as auth_requests
 import os
 
+from google.adk.tools.tool_context import ToolContext
+
+
 def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
     """
     Makes an authenticated POST request to the deployed CloudSploit scanner function.
@@ -48,7 +51,6 @@ def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
         
         response = requests.post(function_url, headers=headers, json=payload, timeout=600) # 10 minute timeout
 
-        # Raise an exception for bad status codes (4xx or 5xx)
         response.raise_for_status()
         
         return response.json()
@@ -71,29 +73,15 @@ def setup_scan(product, service_account_input):
 
     Args:
         product (str): The product or plugin to scan for.
-        service_account_input (dict or str): The GCP service account key, either as a
-                                             dictionary or a JSON-formatted string.
+        service_account_input (dict): The GCP service account key, as a dictionary .
     """
     # --- CONFIGURATION ---
     FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     
     try:
         service_account_key = None
-        # Check if the input is a string that needs parsing
-        if isinstance(service_account_input, str):
-            try:
-                # Pre-process the string to replace literal newlines with escaped newlines.
-                # The JSON standard requires newlines within strings to be escaped as '\\n'.
-                processed_string = service_account_input.replace('\n', '\\n')
-                # Attempt to parse the processed string as JSON
-                service_account_key = json.loads(processed_string)
-            except json.JSONDecodeError:
-                return {
-                    "status": "fail",
-                    "response": "Invalid JSON format for the service account key string. Please ensure it is a valid, single-line JSON string."
-                }
-        # Check if the input is already a dictionary
-        elif isinstance(service_account_input, dict):
+        
+        if isinstance(service_account_input, dict):
             service_account_key = service_account_input
         else:
             # Handle cases where the input is neither a string nor a dictionary
@@ -121,7 +109,8 @@ def setup_scan(product, service_account_input):
 
         # Define the settings for the scan
         scan_settings = {
-            "product": product
+            "product": product,
+            "ignore_ok" : 'true'
         }
         
         # Call the invoker function with the key dictionary
@@ -139,4 +128,3 @@ def setup_scan(product, service_account_input):
             "status": "fail",
             "response": f"An unknown error occurred: {e}"
         }
-
