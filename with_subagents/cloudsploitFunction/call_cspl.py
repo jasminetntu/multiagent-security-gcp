@@ -123,7 +123,8 @@ def setup_scan(product, service_account_input):
 
         # Define the settings for the scan
         scan_settings = {
-            "product": product
+            "product": product,
+            "ignore_ok" : 'true'
         }
         
         # Call the invoker function with the key dictionary
