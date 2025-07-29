@@ -29,6 +29,7 @@ root_agent = LlmAgent(
     name="gcp_coordinator",
     model=MODEL,
     description=("""You're hte root agent who will direct to the correct agent. 
+s
     If {key} is notAvailable and the user asks for a scan, ask for the key, then call the set_key_agent"
     For any other question, follow the instruction to call the correct agent"""),
     instruction=ROOT_AGENT_INSTRUCTION,

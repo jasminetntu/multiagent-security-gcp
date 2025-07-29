@@ -64,25 +64,60 @@ def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
         print(f"An unexpected error occurred: {e}")
         print("Please ensure the service account has the 'Cloud Functions Invoker' and 'Service Account Token Creator' roles.")
 
-def setup_scan(product, service_account_key_json):
+def setup_scan(product, service_account_input):
     """
     Sets up and invokes the scanner with the provided product and key.
+    This function is now robust and can handle the key as a dictionary OR a JSON string.
 
     Args:
         product (str): The product or plugin to scan for.
-        service_account_key_json (str): The GCP service account key as a JSON string.
+        service_account_input (dict or str): The GCP service account key, either as a
+                                             dictionary or a JSON-formatted string.
     """
     # --- CONFIGURATION ---
     FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     
     try:
-        print("Found key is in call_cspl ")
-        print(service_account_key_json)
+        service_account_key = None
+        # Check if the input is a string that needs parsing
+        if isinstance(service_account_input, str):
+            try:
+                # Pre-process the string to replace literal newlines with escaped newlines.
+                # The JSON standard requires newlines within strings to be escaped as '\\n'.
+                processed_string = service_account_input.replace('\n', '\\n')
+                # Attempt to parse the processed string as JSON
+                service_account_key = json.loads(processed_string)
+            except json.JSONDecodeError:
+                return {
+                    "status": "fail",
+                    "response": "Invalid JSON format for the service account key string. Please ensure it is a valid, single-line JSON string."
+                }
+        # Check if the input is already a dictionary
+        elif isinstance(service_account_input, dict):
+            service_account_key = service_account_input
+        else:
+            # Handle cases where the input is neither a string nor a dictionary
+            return {
+                "status": "fail",
+                "response": f"Unsupported type for service account key: {type(service_account_input).__name__}. Must be a dictionary or a JSON string."
+            }
 
-        # Load the key from the JSON string into a dictionary
-        service_account_key = json.loads(service_account_key_json)
+        # --- Post-Processing Validation ---
+        # Ensure we ended up with a dictionary after potential parsing
+        if not isinstance(service_account_key, dict):
+             return {
+                "status": "fail",
+                "response": "Processed service account key is not a dictionary. This can happen if the input string is a JSON literal (e.g., \"'value'\") instead of a JSON object."
+            }
 
-        
+        # --- Key Content Validation ---
+        # Check for essential keys to ensure it's a valid service account key
+        required_keys = ['type', 'project_id', 'private_key_id', 'private_key', 'client_email']
+        if not all(key in service_account_key for key in required_keys) or service_account_key.get('type') != 'service_account':
+            return {
+                "status": "fail",
+                "response": "Invalid service account key format. The dictionary is missing required fields or the 'type' is not 'service_account'."
+            }
 
         # Define the settings for the scan
         scan_settings = {
@@ -97,45 +132,11 @@ def setup_scan(product, service_account_key_json):
             "response": response
         }
         
-    except json.JSONDecodeError:
-        return {
-            "status": "fail",
-            "response": "Invalid JSON format for the service account key."
-        }
     except Exception as e:
+        print("Exception is ")
+        print(e)
         return {
             "status": "fail",
             "response": f"An unknown error occurred: {e}"
         }
 
-# For local testing
-if __name__ == '__main__':
-    # --- CONFIGURATION ---
-    FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
-    KEY_FILE_PATH = 'key.json'  # The key file is only used for local testing now
-
-    # --- EXECUTION ---
-    try:
-        # Define the settings for this specific scan
-        scan_settings = {
-            "plugin": "automaticRestartEnabled"
-        }
-        
-        # Load the service account key from the file into a dictionary
-        if not os.path.exists(KEY_FILE_PATH):
-            print(f"Error: Key file not found at '{KEY_FILE_PATH}'. Please create it for local testing.")
-        else:
-            with open(KEY_FILE_PATH, 'r') as f:
-                key_dict = json.load(f)
-            
-            # Call the function which now handles all logic
-            results = invoke_cloudsploit_scanner(FUNCTION_URL, key_dict, scan_settings)
-            
-            if results:
-                print("\n--- SCAN RESULTS (JSON) ---")
-                # Pretty-print the JSON response
-                print(json.dumps(results, indent=2))
-        
-    except Exception as e:
-        # The function now has its own error handling, but we catch any final issues.
-        print(f"An error occurred during local testing: {e}")

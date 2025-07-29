@@ -17,7 +17,7 @@ session_service = InMemorySessionService()
 # ===== PART 2: Define Initial State =====
 # This will be used when creating a new session
 initial_state = {
-    "key": "notAvailable",
+    "key": "",
     "vulnerabilities": {},
     "interaction_history": [],
 }
