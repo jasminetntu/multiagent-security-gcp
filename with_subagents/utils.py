@@ -262,13 +262,13 @@ async def call_agent_async(runner, user_id, session_id, query):
 
     # Display state before processing the message
     # FIX: display_state is now async, so it must be awaited.
-    await display_state(
-        runner.session_service,
-        runner.app_name,
-        user_id,
-        session_id,
-        "State BEFORE processing",
-    )
+    # await display_state(
+    #     runner.session_service,
+    #     runner.app_name,
+    #     user_id,
+    #     session_id,
+    #     "State BEFORE processing",
+    # )
 
     try:
         # runner.run_async itself yields events, so we iterate over it using async for.

@@ -5,6 +5,9 @@ from google.oauth2 import service_account
 from google.auth.transport import requests as auth_requests
 import os
 
+from google.adk.tools.tool_context import ToolContext
+
+
 def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
     """
     Makes an authenticated POST request to the deployed CloudSploit scanner function.
@@ -48,7 +51,6 @@ def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
         
         response = requests.post(function_url, headers=headers, json=payload, timeout=600) # 10 minute timeout
 
-        # Raise an exception for bad status codes (4xx or 5xx)
         response.raise_for_status()
         
         return response.json()
