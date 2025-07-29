@@ -50,7 +50,22 @@ set_key_agent = Agent(
     name="set_key_agent",
     model=MODEL,
     description="Get the key and call setKey tool to set the key into the state",  # Using description from prompt.py
-    instruction="Get the key and call setKey tool to set the key into the state",  # Using instruction from prompt.py
+    instruction="""Get the key and call setKey tool to set the key into the state. Make sure to set the key as is sent by the user. 
+    the fields available are:
+        {"type": "",
+        "project_id": "",
+        "private_key_id": "",
+        "private_key": "",
+        "client_email": "",
+        "client_id": "",
+        "auth_uri": "",
+        "token_uri": "",
+        "auth_provider_x509_cert_url": "",
+        "client_x509_cert_url": "",
+        "universe_domain": ""}
+
+        Make sure nothing else is sent to the tool and nothing extra is sent. 
+    """,  # Using instruction from prompt.py
     tools=[
         setKey,
     ],

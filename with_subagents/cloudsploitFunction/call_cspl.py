@@ -76,11 +76,13 @@ def setup_scan(product, service_account_key_json):
     FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     
     try:
+        print("Found key is in call_cspl ")
+        print(service_account_key_json)
+
         # Load the key from the JSON string into a dictionary
         service_account_key = json.loads(service_account_key_json)
 
-        print("Found key is in call_cspl ")
-        print(service_account_key)
+        
 
         # Define the settings for the scan
         scan_settings = {
