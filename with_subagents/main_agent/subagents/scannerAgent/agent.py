@@ -11,9 +11,8 @@ from .prompt import SCANNER_PROMPT
 
 def scan_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
     obtained_key = tool_context.state['key']
-    vulnerabilities =  setup_scan(product, obtained_key)
-    tool_context.state['vulnerabilities'] = vulnerabilities
-    return vulnerabilities
+    tool_context.state['vulnerabilities'] =  setup_scan(product, obtained_key)
+    return tool_context.state['vulnerabilities']
 
 scanner_agent = Agent(
     name="scanner_agent",
