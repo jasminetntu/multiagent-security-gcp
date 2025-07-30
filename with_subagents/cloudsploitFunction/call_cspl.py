@@ -5,8 +5,6 @@ from google.oauth2 import service_account
 from google.auth.transport import requests as auth_requests
 import os
 
-from google.adk.tools.tool_context import ToolContext
-
 
 def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
     """
@@ -139,10 +137,23 @@ def setup_scan(product, service_account_input):
         # Call the invoker function with the key dictionary
         response = invoke_cloudsploit_scanner(FUNCTION_URL, service_account_key, scan_settings)
 
+        if isinstance(response, dict):
+            transformed_vulnerabilities_list = [
+                {vulnerability_name: details_list}
+                for vulnerability_name, details_list in response.items()
+            ]
+        else: # response isn't a dict
+            print(f"Warning: Unexpected format for scanner response: {type(response).__name__}. Expected a dictionary.")
+            transformed_vulnerabilities_list = []
+
+        # Return the final, desired structure
         return {
-            "status": "success",
-            "response": response
+            product: transformed_vulnerabilities_list
         }
+
+        # return {
+        #     product : response
+        # }
         
     except Exception as e:
         print("Exception is ")

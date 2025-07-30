@@ -1,3 +1,7 @@
-# Python bytecode
-__pycache__/
+key.json
+
+# Python
+*/__pycache__/*
 *.pyc
+*.pyd
+*.pyo
