@@ -1,7 +1,7 @@
 import asyncio
 
 # Import the main agent
-from main_agent.agent import root_agent
+from gcp_scanner.agent import gcp_scanner
 from dotenv import load_dotenv
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
@@ -42,7 +42,7 @@ async def main_async():
     # ===== PART 4: Agent Runner Setup =====
     # Create a runner with the main customer service agent
     runner = Runner(
-        agent=root_agent,
+        agent=gcp_scanner,
         app_name=APP_NAME,
         session_service=session_service,
     )

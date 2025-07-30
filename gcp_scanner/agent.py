@@ -24,8 +24,8 @@ from .subagents.summaryAgent import summary_agent
 from .prompt import ROOT_AGENT_INSTRUCTION
 
 
-root_agent = LlmAgent(
-    name="gcp_coordinator",
+gcp_scanner = LlmAgent(
+    name="gcp_scanner",
     model=MODEL,
     description=("""You are the root agent that will send the user query to the correct subagent.
     If {key} is notAvailable and the user asks for a scan, ask for the key, then call the set_key_agent"
