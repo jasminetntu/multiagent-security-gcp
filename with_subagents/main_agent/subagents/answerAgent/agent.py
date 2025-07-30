@@ -38,9 +38,9 @@ def answer_request(request: str) -> dict:
             )
         }
 
-def get_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
-    print("this is the vuln list " + str(tool_context.state['vulnerabilities']))
-    return tool_context.state['vulnerabilities'] 
+# def get_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
+#     print("this is the vuln list " + str(tool_context.state['vulnerabilities']))
+#     return tool_context.state['vulnerabilities'] 
 
 answer_agent = Agent(
     name="answer_agent",
@@ -50,7 +50,7 @@ answer_agent = Agent(
     output_key="final_answer_output",             # Added output_key for session state
     tools=[
         answer_request,
-        get_vulnerabilities,
+        # get_vulnerabilities,
         AgentTool(search_agent) # This allows answer_agent to call search_agent
     ],
 )
