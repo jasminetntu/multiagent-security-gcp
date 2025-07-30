@@ -17,7 +17,7 @@ session_service = InMemorySessionService()
 # ===== PART 2: Define Initial State =====
 # This will be used when creating a new session
 initial_state = {
-    "key": "",
+    "key": "notAvailable",
     "vulnerabilities": {},
     "interaction_history": [],
 }
@@ -63,7 +63,7 @@ async def main_async():
         # Update interaction history with the user's query
         # Ensure SESSION_ID is valid before using it here
         if SESSION_ID:
-            add_user_query_to_history(
+            await add_user_query_to_history(
                 session_service, APP_NAME, USER_ID, SESSION_ID, user_input
             )
 

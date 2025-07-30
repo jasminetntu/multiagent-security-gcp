@@ -86,10 +86,10 @@ async def update_interaction_history(session_service, app_name, user_id, session
 # This means the CALLER of these functions (e.g., call_agent_async) MUST be async
 # and MUST await these functions.
 
-def add_user_query_to_history(session_service, app_name, user_id, session_id, query):
+async def add_user_query_to_history(session_service, app_name, user_id, session_id, query):
     """Add a user query to the interaction history."""
     # This call will now implicitly await update_interaction_history if it's called within an async context
-    update_interaction_history(
+    await update_interaction_history(
         session_service,
         app_name,
         user_id,
@@ -101,12 +101,12 @@ def add_user_query_to_history(session_service, app_name, user_id, session_id, qu
     )
 
 
-def add_agent_response_to_history(
+async def add_agent_response_to_history(
     session_service, app_name, user_id, session_id, agent_name, response
 ):
     """Add an agent response to the interaction history."""
     # This call will now implicitly await update_interaction_history if it's called within an async context
-    update_interaction_history(
+    await update_interaction_history(
         session_service,
         app_name,
         user_id,
@@ -296,7 +296,7 @@ async def call_agent_async(runner, user_id, session_id, query):
         # This is problematic if update_interaction_history wasn't awaited.
         # Now that update_interaction_history IS async and awaited internally,
         # calling add_agent_response_to_history from call_agent_async is okay.
-        add_agent_response_to_history(
+        await add_agent_response_to_history(
             runner.session_service,
             runner.app_name,
             user_id,

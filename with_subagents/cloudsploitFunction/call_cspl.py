@@ -25,9 +25,18 @@ def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
         print(f"Generating auth token for audience: {function_url}")
         auth_req = auth_requests.Request()
         
-        # Use from_service_account_info to load credentials from a dictionary
+        #debug line
+        print("DEBUG: Attempting to use key data:", str(service_account_key)[:200] + "...") # Print the first 200 chars
+
+        # --- THIS IS THE DEFINITIVE FIX ---
+        # Create a mutable copy of the key to avoid changing the state directly.
+        key_info_for_auth = service_account_key.copy()
+        # Un-escape the newlines in the private_key field right before using it.
+        key_info_for_auth['private_key'] = key_info_for_auth['private_key'].replace('\\n', '\n')
+
+        # Use the corrected key dictionary for authentication.
         creds = service_account.IDTokenCredentials.from_service_account_info(
-            service_account_key,
+            key_info_for_auth,  # service_account_key,
             target_audience=function_url
         )
         
