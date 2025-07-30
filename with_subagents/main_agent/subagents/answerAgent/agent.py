@@ -18,7 +18,6 @@ from google.adk import Agent
 from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
 from . import prompt
-from colorama import Fore
 from ..searchAgent import search_agent
 from google.adk.tools.tool_context import ToolContext
 
@@ -39,7 +38,6 @@ def answer_request(request: str) -> dict:
         }
 
 # def get_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
-#     print("this is the vuln list " + str(tool_context.state['vulnerabilities']))
 #     return tool_context.state['vulnerabilities'] 
 
 answer_agent = Agent(
