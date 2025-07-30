@@ -5,8 +5,6 @@ from google.oauth2 import service_account
 from google.auth.transport import requests as auth_requests
 import os
 
-from google.adk.tools.tool_context import ToolContext
-
 
 def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
     """
@@ -131,8 +129,8 @@ def setup_scan(product, service_account_input):
         response = invoke_cloudsploit_scanner(FUNCTION_URL, service_account_key, scan_settings)
 
         return {
-            "status": "success",
-            "response": response
+            "product": product,
+            "response": list(response.keys())
         }
         
     except Exception as e:

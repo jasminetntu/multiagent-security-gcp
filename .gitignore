@@ -1,0 +1,7 @@
+key.json
+
+# Python
+*/__pycache__/*
+*.pyc
+*.pyd
+*.pyo

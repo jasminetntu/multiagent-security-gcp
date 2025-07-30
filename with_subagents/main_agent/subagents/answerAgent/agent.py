@@ -18,8 +18,9 @@ from google.adk import Agent
 from google.adk.tools.agent_tool import AgentTool
 from google.genai import types
 from . import prompt
-
+from colorama import Fore
 from ..searchAgent import search_agent
+from google.adk.tools.tool_context import ToolContext
 
 MODEL = "gemini-2.5-flash"
 
@@ -37,6 +38,10 @@ def answer_request(request: str) -> dict:
             )
         }
 
+def get_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
+    print("this is the vuln list " + str(tool_context.state['vulnerabilities']))
+    return tool_context.state['vulnerabilities'] 
+
 answer_agent = Agent(
     name="answer_agent",
     model=MODEL,
@@ -45,6 +50,7 @@ answer_agent = Agent(
     output_key="final_answer_output",             # Added output_key for session state
     tools=[
         answer_request,
+        get_vulnerabilities,
         AgentTool(search_agent) # This allows answer_agent to call search_agent
     ],
 )

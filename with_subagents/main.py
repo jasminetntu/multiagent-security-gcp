@@ -1,4 +1,5 @@
 import asyncio
+from colorama import Fore
 
 # Import the main agent
 from main_agent.agent import root_agent
@@ -74,7 +75,12 @@ async def main_async():
 
     # ===== PART 6: State Examination =====
     # Show final session state
+    print("\n"+Fore.RED + SESSION_ID + Fore.RESET)
     if SESSION_ID: # Check if SESSION_ID was successfully created
+        print(Fore.GREEN + "app name: "+APP_NAME)
+        print("user id: "+USER_ID)
+        print("session id: "+SESSION_ID+ Fore.RESET)
+
         final_session = session_service.get_session(
             app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
         )
@@ -87,8 +93,12 @@ async def main_async():
 
 def main():
     """Entry point for the application."""
-    asyncio.run(main_async())
-
+    try:
+        asyncio.run(main_async())
+    except KeyboardInterrupt:   
+        print("\nExiting program...")
+    except Exception as e:
+        print(f"Error: {e}")
 
 if __name__ == "__main__":
     main()

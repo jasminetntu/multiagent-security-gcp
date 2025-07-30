@@ -5,13 +5,11 @@ from cloudsploitFunction.call_cspl import setup_scan
 
 from google.adk.tools.tool_context import ToolContext
 
-
 MODEL = "gemini-2.5-flash"
 
 from .prompt import SCANNER_PROMPT
 
 def scan_vulnerabilities(tool_context: ToolContext, product: str) -> dict:
-    
     obtained_key = tool_context.state['key']
     vulnerabilities =  setup_scan(product, obtained_key)
     tool_context.state['vulnerabilities'] = vulnerabilities
