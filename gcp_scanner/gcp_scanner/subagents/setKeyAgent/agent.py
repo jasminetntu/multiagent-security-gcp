@@ -40,57 +40,9 @@ class KeyInput(BaseModel):
     client_x509_cert_url: str = Field(description="The client X.509 cert URL")
     universe_domain: str = Field(description="The universe domain")
 
-# def setKey(tool_context: ToolContext, key: dict) -> dict:
-#     """
-#     Get the key from user and set key into the state
-
-#     Args: key
-#     Returns: dict with status and response
-#     """
-
-#     # Check the key
-#     print("Key found is ")
-#     print(key)
-#     key['status'] = 200
-#     tool_context.state["key"] = key
-#     return {
-#             "status": "success",
-#             "response": types.GenerateContentConfig(
-#                 temperature=1,
-#             )
-#         }
-
-# set_key_agent = Agent(
-#     name="set_key_agent",
-#     model=MODEL,
-#     description="Get the key and call setKey tool to set the key into the state",  # Using description from prompt.py
-#     instruction=
-#         """
-#         The user will provide a key in JSON format. Get the key and call setKey tool to set the key into the state. 
-#         Make sure to set the key as is sent by the user, following the provided input schema. 
-#         the fields available are:
-#             {"type": "",
-#             "project_id": "",
-#             "private_key_id": "",
-#             "private_key": "",
-#             "client_email": "",
-#             "client_id": "",
-#             "auth_uri": "",
-#             "token_uri": "",
-#             "auth_provider_x509_cert_url": "",
-#             "client_x509_cert_url": "",
-#             "universe_domain": ""}
-#             The input must be in the exact same order as the input schema.
-#             Make sure nothing else is sent to the tool and nothing extra is sent. 
-#         """,  # Using instruction from prompt.py
-#     tools=[
-#         setKey,
-#     ],
-#     input_schema=KeyInput,
-# )
 
 
-# --- THIS IS THE FIX ---
+
 # Change the function signature to match the fields in KeyInput
 def setKey(
     tool_context: ToolContext,
@@ -114,9 +66,7 @@ def setKey(
         "type": type,
         "project_id": project_id,
         "private_key_id": private_key_id,
-        # IMPORTANT: The private key needs its newlines restored. The LLM/JSON
-        # parsing process will deliver it with escaped newlines ('\\n').
-        "private_key": private_key, #.replace("\\n", "\n"),
+        "private_key": private_key,
         "client_email": client_email,
         "client_id": client_id,
         "auth_uri": auth_uri,
@@ -128,7 +78,7 @@ def setKey(
 
     print("Key reconstructed and is being set in state.")
     # For debugging, print a sanitized version
-    print(json.dumps({k: v for k, v in key_dict.items() if k != 'private_key'}, indent=2))
+    print(json.dumps({k: v for k, v in key_dict.items() }, indent=2))
     
     # Store the complete, correctly formatted dictionary in the state
     tool_context.state["key"] = key_dict
@@ -139,10 +89,10 @@ def setKey(
 set_key_agent = Agent(
     name="set_key_agent",
     model=MODEL,
-    description="Receives a service account key in JSON format and stores it for future use.",
+    description="Receives a service account key in JSON format and stores it for future use. Ensures the security key is copied as is without any alteration",
     instruction="""
-    The user will provide a service account key in JSON format.
-    Your task is to extract all the fields from the provided JSON and call the `setKey` tool with them.
+    The user will provide a service account key in JSON format. Make sure you do not change any letter or any character in the key. 
+    Your job is to accurately extract all the fields from the provided JSON as is and call the `setKey` tool with them.
     Ensure every field from the user's JSON is passed to the corresponding argument in the `setKey` tool.
     """,
     tools=[setKey],

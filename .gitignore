@@ -1,5 +1,7 @@
 key.json
 
+.env
+
 # Python
 */__pycache__/*
 *.pyc

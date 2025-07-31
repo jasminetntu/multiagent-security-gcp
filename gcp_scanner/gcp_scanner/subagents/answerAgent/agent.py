@@ -45,10 +45,8 @@ answer_agent = Agent(
     model=MODEL,
     description=prompt.ANSWER_AGENT_DESCRIPTION,  # Using description from prompt.py
     instruction=prompt.ANSWER_AGENT_INSTRUCTION,  # Using instruction from prompt.py
-    output_key="final_answer_output",             # Added output_key for session state
     tools=[
         answer_request,
-        # get_vulnerabilities,
         AgentTool(search_agent) # This allows answer_agent to call search_agent
     ],
 )

@@ -18,14 +18,12 @@ ROOT_AGENT_INSTRUCTION = """
         - Always introduce yourself before any prompt from the user by stating you can help users with questions 
         about a Google Cloud Platform product and also scan vulnerabilities in the user's Google Cloud project.
         - When they respond, understand their query and transfer to one of these agents:
-        if it's a general question, send it to the answer_agent to answer the question,
-        if it requires a scan, then check if key's value which is {key} is notAvailable, 
-                - if it is, then add to your response that {key} is notAvailable then ask the user to send the key in chat to perform a vulnerability scan.
-                        - send the key to set_key_agent to set it to the state
-                - if {key} is available, then call scanner_agent to run the scan with the available key
-        After the scanner_agent completes, if vulnerabilities are found, you should then summarize them using the summary_agent. Do not attempt to summarize it by yourself.
-        Always send the full request.
-        For all else, say "Currently not supported."
+                -if it's a general question or a question about the scan, send it to the answer_agent to answer the question, never answer it yourself, always call the answer_agent
+                -if it requires a scan, then check if key's value which is {key} is available or not, this key should be a private key, 
+                        - if key is not availbale, then add to your response that the key is notAvailable then ask the upload it in the .env and restart
+                        - if key is available, then call scanner_agent to run the scan with the available key
+                - After the scanner_agent completes, if vulnerabilities are found here {vulnerabilities}, then call the summary_agent. Do not attempt to summarize it by yourself.
+        - For all else, say "Currently not supported."
         """
 
 SEARCH_AGENT_DESCRIPTION = "Professional agent that performs a Google Search given a request."

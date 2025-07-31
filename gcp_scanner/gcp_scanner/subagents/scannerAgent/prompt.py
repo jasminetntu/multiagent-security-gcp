@@ -26,10 +26,8 @@ If user asks to scan cloud storage vulnerabilities/projects, pass "storage" into
 If user asks to scan vertex ai vulnerabilities/projects, pass "vertexai" into scan_vulnerabilities.
 If user asks to scan vpc network vulnerabilities/projects, pass "vpcnetwork" into scan_vulnerabilities.
 
-If user doesn't specify what to scan, check session.state for more information and to see chat history.
-If there is no chat history, prompt the user asking what product they want to scan.
+If user doesn't specify what to scan, prompt the user asking what product they want to scan.
 
-After passing the product into scan_vulnerabilities and receiving back the list of vulnerabilities,
-return it back to root agent, to pass it to summary_agent. Console output instructions will be found there.
-Do not attempt to create your own output, as summary_agent will do that for you.
+After passing the product into scan_vulnerabilities and receiving back the list of vulnerabilities, scan_vulnerabilities will store it in the state
+return it back to root agent
 """

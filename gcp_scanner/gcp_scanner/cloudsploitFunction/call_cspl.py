@@ -17,22 +17,13 @@ def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
         settings (dict): A dictionary of settings for the scan.
     """
     try:
-        # --- Programmatic Authentication ---
-        # Instead of reading from a file, we now use the provided key dictionary
-        # to generate an identity token for the function's URL (the audience).
         print(f"Generating auth token for audience: {function_url}")
         auth_req = auth_requests.Request()
         
-        #debug line
         print("DEBUG: Attempting to use key data:", str(service_account_key)[:200] + "...") # Print the first 200 chars
 
-        # --- THIS IS THE DEFINITIVE FIX ---
-        # Create a mutable copy of the key to avoid changing the state directly.
         key_info_for_auth = service_account_key.copy()
-        # Un-escape the newlines in the private_key field right before using it.
-        key_info_for_auth['private_key'] = key_info_for_auth['private_key'].replace('\\n', '\n')
 
-        # Use the corrected key dictionary for authentication.
         creds = service_account.IDTokenCredentials.from_service_account_info(
             key_info_for_auth,  # service_account_key,
             target_audience=function_url
@@ -59,6 +50,9 @@ def invoke_cloudsploit_scanner(function_url, service_account_key, settings):
         response = requests.post(function_url, headers=headers, json=payload, timeout=600) # 10 minute timeout
 
         response.raise_for_status()
+
+        print("Response is !!")
+        print(response.json())
         
         return response.json()
 
@@ -84,6 +78,7 @@ def setup_scan(product, service_account_input):
                                              dictionary or a JSON-formatted string.
     """
     # --- CONFIGURATION ---
+    print("Reached here 2 ")
     FUNCTION_URL = "https://cloudsploit-scanner-254116077699.us-west1.run.app/"
     
     try:
@@ -91,10 +86,7 @@ def setup_scan(product, service_account_input):
         # Check if the input is a string that needs parsing
         if isinstance(service_account_input, str):
             try:
-                # Pre-process the string to replace literal newlines with escaped newlines.
-                # The JSON standard requires newlines within strings to be escaped as '\\n'.
-                processed_string = service_account_input.replace('\n', '\\n')
-                # Attempt to parse the processed string as JSON
+                processed_string = service_account_input
                 service_account_key = json.loads(processed_string)
             except json.JSONDecodeError:
                 return {
@@ -111,16 +103,12 @@ def setup_scan(product, service_account_input):
                 "response": f"Unsupported type for service account key: {type(service_account_input).__name__}. Must be a dictionary or a JSON string."
             }
 
-        # --- Post-Processing Validation ---
-        # Ensure we ended up with a dictionary after potential parsing
         if not isinstance(service_account_key, dict):
              return {
                 "status": "fail",
                 "response": "Processed service account key is not a dictionary. This can happen if the input string is a JSON literal (e.g., \"'value'\") instead of a JSON object."
             }
 
-        # --- Key Content Validation ---
-        # Check for essential keys to ensure it's a valid service account key
         required_keys = ['type', 'project_id', 'private_key_id', 'private_key', 'client_email']
         if not all(key in service_account_key for key in required_keys) or service_account_key.get('type') != 'service_account':
             return {
@@ -151,9 +139,6 @@ def setup_scan(product, service_account_input):
             product: transformed_vulnerabilities_list
         }
 
-        # return {
-        #     product : response
-        # }
         
     except Exception as e:
         print("Exception is ")

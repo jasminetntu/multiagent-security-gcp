@@ -1,0 +1,2 @@
+KEY="key"
+VULNERABILITIES="vulnerabilities"
