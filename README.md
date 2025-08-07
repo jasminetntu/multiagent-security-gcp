@@ -35,3 +35,4 @@ cd gcp_scanner
 ```
 adk web
 ```
+## How It Works
