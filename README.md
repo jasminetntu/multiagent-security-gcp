@@ -64,13 +64,13 @@ Make sure you are authenticated with the correct account.
 ### Step 2: Deploy the Function
 **From within the cloudsploit directory:**
 ```
-gcloud functions deploy runScan \
+gcloud functions deploy cloudsploitScanner \
 --runtime nodejs18 \
---entry-point cloudsploitScanner \
 --trigger-http \
 --allow-unauthenticated \
---source=. \
---region=us-west1
+--region=us-west1 \
+--memory 1024MB \
+--timeout 540s
 ```
 **Ensure that main.js in the cloudsploit directory exports the following:**
 ```
