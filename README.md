@@ -2,7 +2,7 @@
 >*Google Cloud Sprinternship | Break Through Tech, Summer 2025*
 
 ### Contributors
-- Jasmine Tu, Ena Macahiya, Izabella Doser, Vaishnavi Panchal, Anusri Nagarajan, Aman Shrestha
+Jasmine Tu, Ena Macahiya, Izabella Doser, Vaishnavi Panchal, Anusri Nagarajan, Aman Shrestha
 
 ## Overview
 Strawberry ScanCake (SSC) utilizes micro-service architecture and is a multi-agent AI system designed to streamline security analysis for Technical Account Managers (TAMs). Developed to answer Google Cloud Platform product queries and identify project vulnerabilities, SSC leverages LLMs and the Google Agent Development Kit (ADK) to improve the output readability of a [refactored version of the legacy CloudSploit security repository](https://github.com/amanshresthaatgoogle/cloudsploit). This automates the manual work of deciphering long, convoluted reports, allowing TAMs to focus on customer needs and ask more detailed follow-up questions about specific vulnerabilities (e.g., severity, ease of fix, and steps to fix) in a specific GCP project.
