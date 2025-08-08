@@ -10,6 +10,7 @@ Strawberry ScanCake (SSC) utilizes micro-service architecture and is a multi-age
 ### Relevant Links
 - [Refactored Cloudsploit Repository](https://github.com/amanshresthaatgoogle/cloudsploit)
 - [Final Presentation Slides](https://docs.google.com/presentation/d/136oYaZ4lGX4DScbNB0T87cwMVy0qAMPrafPfqPJz57M/edit?usp=sharing)
+- [Google ADK Repository](https://github.com/google/adk-python)
 
 ## Quick Start
 
