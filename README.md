@@ -5,7 +5,7 @@
 Jasmine Tu, Ena Macahiya, Izabella Doser, Vaishnavi Panchal, Anusri Nagarajan, Aman Shrestha
 
 ## Overview
-Strawberry ScanCake (SSC) utilizes micro-service architecture and is a multi-agent AI system designed to streamline security analysis for Technical Account Managers (TAMs). Developed to answer Google Cloud Platform product queries and identify project vulnerabilities, SSC leverages LLMs and the Google Agent Development Kit (ADK) to improve the output readability and simplify the execution of a [refactored version of the legacy CloudSploit security repository](https://github.com/amanshresthaatgoogle/cloudsploit). This automates the manual work of deciphering long, convoluted reports, allowing TAMs to focus on customer needs and ask more detailed follow-up questions about specific vulnerabilities (e.g., severity, ease of fix, and steps to fix) in a specific GCP project.
+Strawberry ScanCake (SSC) employs a microservice architecture and is a multi-agent AI system designed to streamline security analysis for Technical Account Managers (TAMs). Developed to answer Google Cloud Platform product queries and identify project vulnerabilities, SSC leverages LLMs and the Google Agent Development Kit (ADK) to improve the output readability and simplify the execution of a [refactored version of the legacy CloudSploit security repository](https://github.com/amanshresthaatgoogle/cloudsploit). This automates the manual work of deciphering long, convoluted reports, allowing TAMs to focus on customer needs and ask more detailed follow-up questions about specific vulnerabilities (e.g., severity, ease of fix, and steps to fix) in a specific GCP project.
 
 ### Relevant Links
 - [Refactored Cloudsploit Repository](https://github.com/amanshresthaatgoogle/cloudsploit)
@@ -56,47 +56,11 @@ Strawberry ScanCake consists of two primary components:
    - Filters out all "OK" results and returns a clean JSON of only detected vulnerabilities.
 
 ## Deploying CloudSploit to Google Cloud Functions
-This deployment will allow CloudSploit to run independently in the cloud and respond to HTTP scan requests.
-### Step 1: Setup GCP Environment
-```
-gcloud config set project [YOUR_PROJECT_ID]
-```
-Make sure you are authenticated with the correct account.
-### Step 2: Deploy the Function
-**From within the cloudsploit directory:**
-```
-gcloud functions deploy cloudsploitScanner \
---runtime nodejs18 \
---trigger-http \
---allow-unauthenticated \
---region=us-west1 \
---memory 1024MB \
---timeout 540s
-```
-**Ensure that main.js in the cloudsploit directory exports the following:**
-```
-exports.cloudsploitScanner = async (req, res) => {
-  // cloud function handler logic
-};
-```
-**Example Request Payload:**
-```
-{
-  "serviceAccount": {
-    "client_email": "...",
-    "private_key": "...",
-    "project_id": "..."
-  },
-  "settings": {
-    "product": "compute",
-    "ignore_ok": true
-  }
-}
-```
-The response will be a JSON object containing all detected vulnerabilities grouped by plugin.
+This deployment allows CloudSploit to run independently in the cloud and respond to HTTP scan requests, which is necessary for this multiagent system. 
+To see deployment steps, please visit the README file in the [Refactored Cloudsploit Repository](https://github.com/amanshresthaatgoogle/cloudsploit).
 
 ## Future Use & Flexibility
-- Once deployed the Cloud Function can be called from any client. In our case, we use the agents as the calling tool.
+- Once deployed, the Cloud Function can be called from any client. In our case, we use the agents as the calling tool.
 - This is designed to be modular, allowing for both agent side and cloudsploit side to be maintained, edited, and scaled as needed. Components are also replaceable (plugins, output filters, product mapping, etc.)
 - Can be redeployed or modified as needs evolve.
 - Cloud Function can be shut down to reduce costs post-internship and redeployed on demand.
